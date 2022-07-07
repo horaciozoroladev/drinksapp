@@ -16,6 +16,9 @@
         android:theme="@style/Theme.DrinksApp"
         tools:targetApi="31">
         <activity
+            android:name=".DrinkDetail"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
