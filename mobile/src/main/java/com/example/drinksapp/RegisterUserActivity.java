@@ -27,17 +27,12 @@ public class RegisterUserActivity extends AppCompatActivity {
         Register();
     }
 
-    /*public void Registrarse(View view) {
-        Intent regresar = new Intent(this, MainActivity.class);
-        startActivity(regresar);
-    }*/
-
     public void Register() {
         Button buttonRegister = findViewById(R.id.buttonRegister);
 
         buttonRegister.setOnClickListener(view -> {
 
-            Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiMobile.BASEurl)
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiMobile.BASE_URL2)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
@@ -54,37 +49,41 @@ public class RegisterUserActivity extends AppCompatActivity {
             String eT4 = editText4.getText().toString();  //surname
 
             String jsonStr = "{'givenname': '" + eT3 + "', 'surname': '" + eT4 + "', 'username': '" + eT + "', 'pass': '" + eT2 + "'}";
-            System.out.println(jsonStr);
+
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonStr);
 
             Call<Object> call = apiMobile.Register(jsonObject);
-            System.out.println("success 2");
+
             call.enqueue(new Callback<Object>() {
 
                 @Override
                 public void onResponse(Call<Object> call, Response<Object> response) {
-                    System.out.println(response);
+
                     if (response.isSuccessful()) {
-                        System.out.println("success registro");
-                        //JSONObject drink = new JSONObject((Map) response.body());
-                        //setRandomDrink(drink);
+
+
                         Toast.makeText(view.getContext(), "Registro exitoso", Toast.LENGTH_SHORT).show();
                         Intent MyRegister = new Intent(view.getContext(), MainActivity.class);
                         startActivity(MyRegister);
-                        //System.out.println("EMILIANOOOOOOOOOO");
+
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Object> call, Throwable t) {
-                    System.out.println(t);
+
                     Toast.makeText(RegisterUserActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
 
             });
 
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 
     public void Back(View view) {

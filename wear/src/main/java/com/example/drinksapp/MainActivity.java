@@ -57,7 +57,7 @@ public class MainActivity extends Activity implements DataClient.OnDataChangedLi
     DataClient dataClient;
     private static final String COUNT_KEY = "drink";
     JSONObject randomDrink;
-    //private String idDrinkEXT = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,24 +110,12 @@ public class MainActivity extends Activity implements DataClient.OnDataChangedLi
 
                     JSONObject drink = new JSONObject((Map) response.body());
                     setRandomDrink(drink);
-                    /*try {
-                        String idDrink = drink.getString("idDrink");
-                        idDrinkEXT = idDrink;
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }*/
-
-                    //System.out.println(idDrinkEXT);
-                    //Bundle drinkVariable = new Bundle();
-                    //drinkVariable.putString("drinkVariable", idDrinkEXT);
-
-                    //Intent intent = new Intent(MainActivity.this, .class);
                 }
             }
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
-                // System.out.println(t.toString());
+
                 Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
 

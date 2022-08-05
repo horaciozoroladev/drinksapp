@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -48,6 +49,8 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
     private String idDrinkEXT = "";
     private String strDrinkTxt = "";
     //private String _id = "";
+    private Button Fbtn;
+    private Button Dbtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,11 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
 
         FavoriteDrinks();
         Logout();
+        DoneDrinks();
+        Fbtn = findViewById(R.id.buttonFavoritos);
+        Dbtn = findViewById(R.id.buttonDone);
+        Fbtn.setVisibility(View.INVISIBLE);
+        Dbtn.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -92,6 +100,9 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
                 if (item.getUri().getPath().compareTo("/drink") == 0) {
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     setDrinkInfo(dataMap.getString(COUNT_KEY));
+
+                    Fbtn.setVisibility(View.VISIBLE);
+                    Dbtn.setVisibility(View.VISIBLE);
 
                 }
 
@@ -133,13 +144,12 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            System.out.println(strDrinkTxt);
 
             Glide.with(this).load(drink.getString("strDrinkThumb")).into(strDrinkThumb);
             strDrink.setText(drink.getString("strDrink"));
             strInstructions.setText(drink.getString("strInstructions"));
 
-            for(Iterator<String> i = drink.keys(); i.hasNext();) {
+            for (Iterator<String> i = drink.keys(); i.hasNext(); ) {
                 String key = i.next();
                 Object value = drink.get(key);
                 if (key.contains("strIngredient")) {
@@ -155,7 +165,7 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
                 }
             }
 
-            for (int i=0; i < ingredients.size(); i++) {
+            for (int i = 0; i < ingredients.size(); i++) {
                 String ing = "";
                 String mes = "";
 
@@ -173,15 +183,14 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
                 ingredienteCantidad = ingredienteCantidad.replaceAll(" , ;", "");
                 strIngredients.setText(ingredienteCantidad.trim());
 
-                System.out.println(ingredienteCantidad);
+
             }
 
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
-        System.out.println("wear");
-        System.out.println(strDrink);
+
     }
 
     public void FavoriteDrinks() {
@@ -195,41 +204,33 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
 
             ApiMobile apiMobile = retrofit.create(ApiMobile.class);
 
-            //EditText editText = findViewById(R.id.username);
-            //EditText editText2 = findViewById(R.id.pass);
+            String _id = getIntent().getStringExtra("_id");
 
             String eT = idDrinkEXT;
-            //eT = idDrinkEXT;
-            String eT2 = "1";
-            //eT2 = editText2.getText().toString();
+            String eT2 = _id;
 
-            //Toast.makeText(DrinkDetail.this, "el id es: " + idDrinkEXT, Toast.LENGTH_SHORT).show();
             String jsonStr = "{'idDrink': '" + eT + "', 'users__id': '" + eT2 + "'}";
-            //System.out.println(jsonStr);
+
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonStr);
 
-            //System.out.println("success");
             Call<Object> call = apiMobile.FavoriteDrinks(jsonObject);
-            System.out.println("success 2");
             call.enqueue(new Callback<Object>() {
 
                 @Override
                 public void onResponse(Call<Object> call, Response<Object> response) {
-                    System.out.println(response);
+
                     if (response.isSuccessful()) {
-                        //JSONObject drink = new JSONObject((Map) response.body());
-                        //setRandomDrink(drink);
-                        /*Intent MyDavoriteDrink = new Intent(view.getContext(), DrinkDetail.class);
-                        startActivity(MyDavoriteDrink);*/
                         Toast.makeText(DrinkDetail.this, "La Bebida '" + strDrinkTxt + "' se agrego a Favoritos ", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(DrinkDetail.this, "Error al guardar la bebida..", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Object> call, Throwable t) {
-                    System.out.println(t);
-                    Toast.makeText(DrinkDetail.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(DrinkDetail.this, "Error al guardar la bebida..", Toast.LENGTH_SHORT).show();
                 }
 
             });
@@ -248,38 +249,26 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
 
             ApiMobile apiMobile = retrofit.create(ApiMobile.class);
 
-            //EditText editText = findViewById(R.id.username);
-            //EditText editText2 = findViewById(R.id.pass);
-
-            /*Bundle extras = getIntent().getExtras();
-            String _id = extras.getString("_id");
-            String username = extras.getString("username");*/
             String _id = getIntent().getStringExtra("_id");
             String username = getIntent().getStringExtra("username");
 
-            System.out.println(_id);
-            System.out.println(username);
             String eT = _id;
             String eT2 = username;
-            //eT2 = editText2.getText().toString();
 
-            //Toast.makeText(DrinkDetail.this, "el id es: " + idDrinkEXT, Toast.LENGTH_SHORT).show();
             String jsonStr = "{'username': '" + eT2 + "', '_id': '" + eT + "'}";
-            //System.out.println(jsonStr);
+
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonStr);
 
-            //System.out.println("success");
-            Call<Object> call = apiMobile.FavoriteDrinks(jsonObject);
-            //System.out.println("success 2");
+
+            Call<Object> call = apiMobile.LOGOUT(jsonObject);
+
             call.enqueue(new Callback<Object>() {
 
                 @Override
                 public void onResponse(Call<Object> call, Response<Object> response) {
-                    System.out.println(response);
+
                     if (response.isSuccessful()) {
-                        //JSONObject drink = new JSONObject((Map) response.body());
-                        //setRandomDrink(drink);
                         Toast.makeText(DrinkDetail.this, "Se cerro la sesion", Toast.LENGTH_SHORT).show();
                         Intent Logoutbtn = new Intent(view.getContext(), MainActivity.class);
                         startActivity(Logoutbtn);
@@ -290,8 +279,53 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
 
                 @Override
                 public void onFailure(Call<Object> call, Throwable t) {
-                    System.out.println(t);
+
                     Toast.makeText(DrinkDetail.this, "Error al cerrar sesion..", Toast.LENGTH_SHORT).show();
+                }
+
+            });
+
+        });
+    }
+
+    public void DoneDrinks() {
+        Button buttonDone = findViewById(R.id.buttonDone);
+
+        buttonDone.setOnClickListener(view -> {
+
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiMobile.BASE_URL2)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            ApiMobile apiMobile = retrofit.create(ApiMobile.class);
+
+            String _id = getIntent().getStringExtra("_id");
+
+            String eT = idDrinkEXT;
+            String eT2 = _id;
+
+            String jsonStr = "{'idDrink': '" + eT + "', 'users__id': '" + eT2 + "'}";
+            JsonParser jsonParser = new JsonParser();
+            JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonStr);
+
+            Call<Object> call = apiMobile.DoneDrink(jsonObject);
+            call.enqueue(new Callback<Object>() {
+
+                @Override
+                public void onResponse(Call<Object> call, Response<Object> response) {
+
+                    if (response.isSuccessful()) {
+                        Toast.makeText(DrinkDetail.this, "La Bebida '" + strDrinkTxt + "' se Realizo con exito ", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(DrinkDetail.this, "Error al guardar la bebida..", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+
+                    Toast.makeText(DrinkDetail.this, "Error al guardar la bebida..", Toast.LENGTH_SHORT).show();
                 }
 
             });
@@ -307,6 +341,11 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
 
     @Override
     public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
+
+    }
+
+    @Override
+    public void onBackPressed() {
 
     }
 
