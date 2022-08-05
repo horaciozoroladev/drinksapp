@@ -3,8 +3,10 @@ package com.example.drinksapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,23 +23,39 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Stack;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataChangedListener,
         MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
 
     private static final String COUNT_KEY = "drink";
     DataClient dataClient;
+    private String strID = "";
+    private String idDrinkEXT = "";
+    private String strDrinkTxt = "";
+    //private String _id = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drink_detail);
+
+        FavoriteDrinks();
+        Logout();
     }
 
     @Override
@@ -84,6 +102,7 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
     }
 
     public void setDrinkInfo(String drinkStr) {
+
         ImageView strDrinkThumb = findViewById(R.id.strDrinkThumb);
 
         TextView strDrink = findViewById(R.id.strDrink);
@@ -98,7 +117,23 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
         try {
 
             JSONObject drink = new JSONObject(drinkStr);
-            System.out.println(drink);
+
+            // id
+            try {
+                String idDrink = drink.getString("idDrink");
+                idDrinkEXT = idDrink;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            // STR
+            try {
+                String strDrinkTXT = drink.getString("strDrink");
+                strDrinkTxt = strDrinkTXT;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            System.out.println(strDrinkTxt);
 
             Glide.with(this).load(drink.getString("strDrinkThumb")).into(strDrinkThumb);
             strDrink.setText(drink.getString("strDrink"));
@@ -144,7 +179,126 @@ public class DrinkDetail extends AppCompatActivity implements DataClient.OnDataC
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+
+        System.out.println("wear");
+        System.out.println(strDrink);
     }
+
+    public void FavoriteDrinks() {
+        Button buttonFavoritos = findViewById(R.id.buttonFavoritos);
+
+        buttonFavoritos.setOnClickListener(view -> {
+
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiMobile.BASE_URL2)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            ApiMobile apiMobile = retrofit.create(ApiMobile.class);
+
+            //EditText editText = findViewById(R.id.username);
+            //EditText editText2 = findViewById(R.id.pass);
+
+            String eT = idDrinkEXT;
+            //eT = idDrinkEXT;
+            String eT2 = "1";
+            //eT2 = editText2.getText().toString();
+
+            //Toast.makeText(DrinkDetail.this, "el id es: " + idDrinkEXT, Toast.LENGTH_SHORT).show();
+            String jsonStr = "{'idDrink': '" + eT + "', 'users__id': '" + eT2 + "'}";
+            //System.out.println(jsonStr);
+            JsonParser jsonParser = new JsonParser();
+            JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonStr);
+
+            //System.out.println("success");
+            Call<Object> call = apiMobile.FavoriteDrinks(jsonObject);
+            System.out.println("success 2");
+            call.enqueue(new Callback<Object>() {
+
+                @Override
+                public void onResponse(Call<Object> call, Response<Object> response) {
+                    System.out.println(response);
+                    if (response.isSuccessful()) {
+                        //JSONObject drink = new JSONObject((Map) response.body());
+                        //setRandomDrink(drink);
+                        /*Intent MyDavoriteDrink = new Intent(view.getContext(), DrinkDetail.class);
+                        startActivity(MyDavoriteDrink);*/
+                        Toast.makeText(DrinkDetail.this, "La Bebida '" + strDrinkTxt + "' se agrego a Favoritos ", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+                    System.out.println(t);
+                    Toast.makeText(DrinkDetail.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+            });
+
+        });
+    }
+
+    public void Logout() {
+        Button buttonLogout = findViewById(R.id.buttonLogout);
+
+        buttonLogout.setOnClickListener(view -> {
+
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiMobile.BASE_URL2)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            ApiMobile apiMobile = retrofit.create(ApiMobile.class);
+
+            //EditText editText = findViewById(R.id.username);
+            //EditText editText2 = findViewById(R.id.pass);
+
+            /*Bundle extras = getIntent().getExtras();
+            String _id = extras.getString("_id");
+            String username = extras.getString("username");*/
+            String _id = getIntent().getStringExtra("_id");
+            String username = getIntent().getStringExtra("username");
+
+            System.out.println(_id);
+            System.out.println(username);
+            String eT = _id;
+            String eT2 = username;
+            //eT2 = editText2.getText().toString();
+
+            //Toast.makeText(DrinkDetail.this, "el id es: " + idDrinkEXT, Toast.LENGTH_SHORT).show();
+            String jsonStr = "{'username': '" + eT2 + "', '_id': '" + eT + "'}";
+            //System.out.println(jsonStr);
+            JsonParser jsonParser = new JsonParser();
+            JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonStr);
+
+            //System.out.println("success");
+            Call<Object> call = apiMobile.FavoriteDrinks(jsonObject);
+            //System.out.println("success 2");
+            call.enqueue(new Callback<Object>() {
+
+                @Override
+                public void onResponse(Call<Object> call, Response<Object> response) {
+                    System.out.println(response);
+                    if (response.isSuccessful()) {
+                        //JSONObject drink = new JSONObject((Map) response.body());
+                        //setRandomDrink(drink);
+                        Toast.makeText(DrinkDetail.this, "Se cerro la sesion", Toast.LENGTH_SHORT).show();
+                        Intent Logoutbtn = new Intent(view.getContext(), MainActivity.class);
+                        startActivity(Logoutbtn);
+                    } else {
+                        Toast.makeText(DrinkDetail.this, "Error al cerrar sesion..", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+                    System.out.println(t);
+                    Toast.makeText(DrinkDetail.this, "Error al cerrar sesion..", Toast.LENGTH_SHORT).show();
+                }
+
+            });
+
+        });
+    }
+
 
     @Override
     public void onMessageReceived(@NonNull MessageEvent messageEvent) {

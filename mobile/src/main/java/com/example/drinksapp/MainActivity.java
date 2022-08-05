@@ -1,5 +1,7 @@
 package com.example.drinksapp;
 
+import static android.provider.Telephony.Mms.Part.TEXT;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -15,13 +17,18 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,86 +42,23 @@ public class MainActivity extends AppCompatActivity {
 
     EditText username, pass;
     Button buttonLogin;
+    private String strTxt = "";
+    private String _id = "";
+    private String STRusername = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //EditText Text = findViewById(R.id.username);
+        //Set Text = "";
+        //System.out.println(findViewById(R.id.pass).toString());
+        //String Txt2 = Text2;
+
         onClickLogin();
-        //Inicializamos
-        /*username = findViewById(R.id.username);
-        pass = findViewById(R.id.pass);
-        buttonLogin = findViewById(R.id.buttonLogin);
 
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //ValidarLogin("http://127.0.0.1/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://127.0.0.1/drinks__api/Validarusuario.php");
-                //ValidarLogin("http://127.0.0.1:33061/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://127.0.0.1:33061/drinks__api/Validarusuario.php");
-
-                //ValidarLogin("http://localhost/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://localhost/drinks__api/Validarusuario.php");
-                //ValidarLogin("http://localhost:33061/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://localhost:33061/drinks__api/Validarusuario.php");
-
-        //ValidarLogin("http://127.0.0.1/drinks__api/Validarusuario.php");
-        //ValidarLogin("https://127.0.0.1/drinks__api/Validarusuario.php");
-                //ValidarLogin("http://127.0.0.1:33061/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://127.0.0.1:33061/drinks__api/Validarusuario.php");
-
-                //ValidarLogin("http://192.168.0.7/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://192.168.0.7/drinks__api/Validarusuario.php");
-                //ValidarLogin("http://192.168.0.7:33061/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://192.168.0.7:33061/drinks__api/Validarusuario.php");
-
-                //ValidarLogin("http://192.168.137.1/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://192.168.137.1/drinks__api/Validarusuario.php");
-                //ValidarLogin("http://192.168.137.1:33061/drinks__api/Validarusuario.php");
-                //ValidarLogin("https://192.168.137.1:33061/drinks__api/Validarusuario.php");
-
-                //Funciona para pixel emulado
-                //ValidarLogin("http://10.0.2.2:8080/drinks__api/Validarusuario.php");
-                ValidarLogin("https://localhost/drinks__api/Validarusuario.php");
-            }
-        });*/
     }
-
-    /*private void ValidarLogin(String URL) {
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
-
-            @Override
-            public void onResponse(String response) {
-
-                if(!response.isEmpty()) {
-                    Intent intent = new Intent(getApplicationContext(), DrinkDetail.class);
-                    startActivity(intent);
-
-                }else {
-                    Toast.makeText(MainActivity.this, "usuario o contraseña incorrectos 2", Toast.LENGTH_SHORT).show();
-                }
-                System.out.println(response);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, "usuario o contraseña incorrectos 3", Toast.LENGTH_SHORT).show();
-                System.out.println(error);
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> Parametros = new HashMap<String, String>();
-                Parametros.put("username", username.getText().toString());
-                Parametros.put("pass", pass.getText().toString());
-                return Parametros;
-            }
-        };
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(stringRequest);
-    }*/
 
     public void onClickLogin() {
         Button buttonLogin = findViewById(R.id.buttonLogin);
@@ -131,38 +75,62 @@ public class MainActivity extends AppCompatActivity {
             EditText editText2 = findViewById(R.id.pass);
 
             String eT = editText.getText().toString();
-            //eT = editText.getText().toString();
             String eT2 = editText2.getText().toString();
-            //eT2 = editText2.getText().toString();
-            System.out.println("sexo");
 
             String jsonStr = "{'username': '" + eT + "', 'pass': '" + eT2 + "'}";
             System.out.println(jsonStr);
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonStr);
 
-            System.out.println("success");
             Call<Object> call = apiMobile.LoginUser(jsonObject);
-            System.out.println("success 2");
             call.enqueue(new Callback<Object>() {
 
                 @Override
                 public void onResponse(Call<Object> call, Response<Object> response) {
-                    System.out.println(response);
+
+                    try {
+                        //response = client.newCall(request).execute();
+                        JSONObject jj = new JSONObject((Map) response.body());
+                        _id = jj.getString("_id");
+                        //idDrinkEXT = idDrink;
+                        System.out.println(_id);
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        //response = client.newCall(request).execute();
+                        JSONObject jj = new JSONObject((Map) response.body());
+                        STRusername = jj.getString("username");
+                        System.out.println(STRusername);
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+
                     if (response.isSuccessful()) {
-                        System.out.println("success");
-                        //JSONObject drink = new JSONObject((Map) response.body());
-                        //setRandomDrink(drink);
-                        /*Intent Mylogin = new Intent(this, DrinkDetail.class);
+
+                        /*Intent Mylogin = new Intent(view.getContext(), DrinkDetail.class);
                         startActivity(Mylogin);*/
-                        System.out.println("EMILIANOOOOOOOOOO");
+                        Intent intent = new Intent(view.getContext(), DrinkDetail.class);
+                        //Bundle extras = new Bundle();
+                        //extras.putString("_id", _id);
+                        //extras.putString("username", STRusername);
+                        intent.putExtra("_id", _id);
+                        intent.putExtra("username", STRusername);
+                        //intent.putExtras(extras);
+
+                        startActivity(intent);
+                        editText.setText("");
+                        editText2.setText("");
+                    } else {
+                        Toast.makeText(MainActivity.this, "Contraseña o nombre incorrecto", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Object> call, Throwable t) {
-                    System.out.println(t);
-                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Contraseña o nombre incorrecto", Toast.LENGTH_SHORT).show();
                 }
 
             });
@@ -174,6 +142,72 @@ public class MainActivity extends AppCompatActivity {
 
         Intent registro = new Intent(this, RegisterUserActivity.class);
         startActivity(registro);
+        EditText editText = findViewById(R.id.username);
+        EditText editText2 = findViewById(R.id.pass);
+        editText.setText("");
+        editText2.setText("");
     }
+
+    /*public void GetUserInfo() {
+        /*Button buttonLogin = findViewById(R.id.buttonLogin);
+
+        buttonLogin.setOnClickListener(view -> {
+
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiMobile.BASE_URL2)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            ApiMobile apiMobile = retrofit.create(ApiMobile.class);
+
+            //EditText editText = findViewById(R.id.username);
+            //EditText editText2 = findViewById(R.id.pass);
+
+            String eT = editText.getText().toString();
+            String eT2 = editText2.getText().toString();
+
+            String jsonStr = "{'username': '" + eT + "', 'pass': '" + eT2 + "'}";
+            System.out.println(jsonStr);
+            JsonParser jsonParser = new JsonParser();
+            JsonObject jsonObject = (JsonObject) jsonParser.parse(jsonStr);
+
+            Call<Object> call = apiMobile.LoginUser(jsonObject);
+            call.enqueue(new Callback<Object>() {
+
+                @Override
+                public void onResponse(Call<Object> call, Response<Object> response) {
+
+                    /*try {
+                        String str = drink.getString("strDrink");
+                        strTxt = str;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(strTxt);*/
+
+                    /*if(response.body() != null ) {
+                        String _id = getString(0);
+                        System.out.println(_id);
+                    }
+
+                    if (response.isSuccessful()) {
+
+                        Intent Mylogin = new Intent(view.getContext(), DrinkDetail.class);
+                        startActivity(Mylogin);
+                        editText.setText("");
+                        editText2.setText("");
+                    } else {
+                        Toast.makeText(MainActivity.this, "Contraseña o nombre incorrecto", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, "Contraseña o nombre incorrecto", Toast.LENGTH_SHORT).show();
+                }
+
+            });
+
+        //});
+    }*/
 
 }

@@ -1,8 +1,10 @@
 package com.example.drinksapp;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.JsonReader;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,11 +26,21 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,6 +57,7 @@ public class MainActivity extends Activity implements DataClient.OnDataChangedLi
     DataClient dataClient;
     private static final String COUNT_KEY = "drink";
     JSONObject randomDrink;
+    //private String idDrinkEXT = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +110,18 @@ public class MainActivity extends Activity implements DataClient.OnDataChangedLi
 
                     JSONObject drink = new JSONObject((Map) response.body());
                     setRandomDrink(drink);
+                    /*try {
+                        String idDrink = drink.getString("idDrink");
+                        idDrinkEXT = idDrink;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }*/
 
+                    //System.out.println(idDrinkEXT);
+                    //Bundle drinkVariable = new Bundle();
+                    //drinkVariable.putString("drinkVariable", idDrinkEXT);
+
+                    //Intent intent = new Intent(MainActivity.this, .class);
                 }
             }
 
