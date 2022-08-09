@@ -1,8 +1,10 @@
 package com.example.drinksapp;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.JsonReader;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,11 +26,21 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,6 +58,7 @@ public class MainActivity extends Activity implements DataClient.OnDataChangedLi
     private static final String COUNT_KEY = "drink";
     JSONObject randomDrink;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,8 +67,8 @@ public class MainActivity extends Activity implements DataClient.OnDataChangedLi
         setContentView(binding.getRoot());
 
         getRandomDrink();
-        onClickRefresh();
         onClickSendToMobile();
+        onClickRefresh();
 
     }
 
@@ -97,13 +110,12 @@ public class MainActivity extends Activity implements DataClient.OnDataChangedLi
 
                     JSONObject drink = new JSONObject((Map) response.body());
                     setRandomDrink(drink);
-
                 }
             }
 
             @Override
             public void onFailure(Call<Object> call, Throwable t) {
-                // System.out.println(t.toString());
+
                 Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
@@ -137,12 +149,18 @@ public class MainActivity extends Activity implements DataClient.OnDataChangedLi
 
         button.setOnClickListener(view -> {
             dataClient = Wearable.getDataClient(this);
+
             PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/drink").setUrgent();
+
             putDataMapReq.getDataMap().putString(COUNT_KEY, randomDrink.toString());
+
             PutDataRequest putDataReq = putDataMapReq.asPutDataRequest().setUrgent();
+
             Task<DataItem> putDataTask = dataClient.putDataItem(putDataReq);
 
             putDataTask.addOnSuccessListener(dataItem -> Toast.makeText(getApplicationContext(), "Revisa tu telefono 🍺", Toast.LENGTH_LONG).show());
+
+
         });
     }
 

@@ -20,6 +20,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <Button
+                android:id="@+id/buttonLogout"
+                android:layout_width="152dp"
+                android:layout_height="43dp"
+                android:layout_marginStart="220dp"
+                android:layout_marginTop="10dp"
+                android:background="#1d77c2"
+                android:text="Logout" />
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -83,19 +92,17 @@
                     tools:layout_editor_absoluteX="0dp" />
 
                 <Button
-                    android:id="@+id/buttonRefrescar"
+                    android:id="@+id/buttonFavoritos"
                     android:layout_width="66dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="76dp"
                     android:layout_marginTop="12dp"
-                    android:layout_marginEnd="100dp"
                     android:text="⭐"
-                    app:layout_constraintEnd_toStartOf="@+id/buttonEnviar"
-                    app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/strIngredients" />
 
                 <Button
-                    android:id="@+id/buttonEnviar"
+                    android:id="@+id/buttonDone"
                     android:layout_width="71dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
